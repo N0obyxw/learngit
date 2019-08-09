@@ -1,0 +1,257 @@
+
+$ pwd
+查看当前所在工作目录
+$ cd learngit
+转到learngit目录
+$ git init
+把这个目录变成git可以管理的仓库
+对应提示（Initialized empty Git repository in /Users/michael/learngit/.git/）
+编写一个readme.txt文件，放在learngit（子）目录下。
+
+现在需要把该文本文件放在git仓库中，
+第一步：$ git add readme.txt
+无消息提示则表示添加成功。
+第二步：$ git commit -m "wrote a readme file"
+git commit表示将已添加的文件全部提交到仓库中。
+-m表示对该次提交的说明，可以输入任意内容
+（为什么Git添加文件需要add，commit一共两步呢？因为commit可以一次提交很多文件，所以你可以多次add不同的文件，比如：
+$ git add file1.txt
+$ git add file2.txt file3.txt
+$ git commit -m "add 3 files."）
+
+添加完成，开始工作（对原文件进行修改）
+运行git status可以告诉我们当前仓库的状态，输出的命令会告诉我们，readme.txt被修改过了，但还没准备提交。
+如果需要查看修改内容，可以使用git diff命令。
+知道readme.txt做出的修改后，提交修改和新文件是和之前一样的两步。
+在执行git commit之前，可以再运行git status查看当前仓库的状态
+（显示可提交文件）提交后再执行git status命令会提示“working tree clean”
+
+
+更新的版本我们无法记住，但可以使用git log 命令查看。
+于是我们可以查看以往的工作修改内容。
+添加命令$ git log --pretty=oneline可以将操作者执行的操作上传的版本，自动排成一排。
+
+时光穿梭机：将仓库中操作的文件回退到上个版本，执行git reset命令。
+$ git log
+（commit 1094adb7b9b3807259d8cb349e7df1d4d6477073 (HEAD -> master)
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 21:06:15 2018 +0800
+
+    append GPL
+
+commit e475afc93c209a690c39c13a46716e8fa000c366
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 21:03:36 2018 +0800
+
+    add distributed
+
+commit eaadf4e385e865d25c48e7ca9c8395c3f7dfaef0
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 20:59:18 2018 +0800
+
+    wrote a readme file
+）
+
+$ git reset --hard HEAD^（HEAD指向的版本就是当前版本，相当于一个指针）
+使用该命令回退到上一个版本命令后，使用git log查看对应最新的命令看不到了，但是可以通过找到它的commit id，于是就可以指定回到未来的某个版本。
+$ git reset --hard 1094a
+HEAD is now at 83b0afe append GPL
+
+接着可以使用    $ cat readme.txt      显示TXT文档的内容
+如果想恢复到新版本的话，就必须知道那个新版本的commit id，使用命令git reflog来记录每一次命令。并且该命令可以看到所有的历史版本号。
+
+
+git的暂存区其实就是在使用git add命令后，把工作初期工作区的文件添加到版本库中的stage区域，再使用git commit提交到master区域
+
+Git 跟踪管理的是修改，当使用git add命令后，在工作区的第一次修改被放入暂存区，准备提交，但是，在工作区的第二次修改并没有放入暂存区，所以，git commit只负责暂存区的修改提交了，也就是第一次的修改被提交了，第二次的修改不会被提交。
+F：第一次修改 -> git add -> 第二次修改 -> git commit
+T：第一次修改 -> git add -> 第二次修改 -> git add -> git commit
+：：：提交后，可以使用git diff HEAD -- readme.txt命令可以查看工作区和版本库里最新版本的区别。
+HEAD是指向最新版本的指针。
+
+撤销修改
+
+1，如果你在工作区做出一个错误的修改行为，此时要做出撤销该修改的行为，可以手动删除这一段。
+  如果用git status查看一下，Git会告诉你，使用git checkout--file（“--”不能忘掉）可以丢弃工作区的修改，该命令的意思是，把readme.txt文件在工作区的修改全部撤销。其机制说到底就是让这个文件回到最近一次git commit或git add时的状态。
+2，如果不小心把错误给提交到暂存区。
+Git同样告诉我们，用命令git reset HEAD <file>可以把暂存区的修改撤销掉（unstage），重新放回工作区。
+git reset命令既可以回退版本，也可以把暂存区的修改回退到工作区。当我们用HEAD时，表示最新的版本。
+再用git status查看一下，现在暂存区是干净的，工作区有修改，接着丢弃工作区（实现第一步操作），于是错误的操作被完全删除。
+3，如果该命令已经提交到了版本库。这时候，可以使用前面说到的  版本回退  功能。不过前提是没有推送到远程库。
+
+删除文件
+
+删除也是修改操作，先添加一个文本文件。一般情况下，在文件管理器中把没用的文件删了，或者使用rm命令删了，然后输入命令：git commit。
+rm test.txt。
+此时使用git status命令会告诉你已经删除哪些文件。
+（如果删错了，版本库里还有，所以可以把误删的文件恢复到最新版本）
+使用$ git checkout -- test.txt
+git checkout其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
+
+
+
+远程仓库
+通过注册GitHub建立远程仓库
+
+
+cd~(进入用户主目录)
+cd .ssh(进入.ssh目录)
+ls(列出.ssh目录的文件，可以看到id_rsa  id_rsa.pub两个文件)
+cat ~/.ssh/id_rsa.pub(可以看到id_rsa.pub文件的内容，复制即可)
+返回上一级目录：cd ..
+
+要关联一个远程库，使用命令git remote add origin git@server-name:path/repo-name.git；
+关联后，使用命令git push -u origin master第一次推送master分支的所有内容；
+此后，每次本地提交后，只要有必要，就可以使用命令git push origin master推送最新修改；
+
+
+从远程库克隆
+在git 远程客户端建立一个数据仓库，会有已建立的默认文件。
+$ git clone git@github.com:+用户名+gitskills.git
+要克隆一个仓库，首先必须知道仓库的地址，然后使用git clone命令克隆。
+Git支持多种协议，包括https，但通过ssh支持的原生git协议速度最快。
+
+
+创建与合并分支
+在版本回退里，已经知道，每次提交，Git都把它们串成一条时间线，这条时间线就是一个分支。截止到目前，只有一条时间线，在Git里，这个分支叫主分支，即master分支。HEAD严格来说不是指向提交，而是指向master，master才是指向提交的。
+所以，HEAD指向的就是当前分支。
+每次提交，master分支都会向前移动一步，这样，随着你不断提交，master分支的线也越来越长：（版本数越来越多，往后不断增加）
+实战bush命令：
+首先，我们创建dev分支，然后切换到dev分支：
+$ git checkout -b dev
+  注意 ：（git checkout命令加上-b参数表示创建并切换，相当于以下两条命令：
+$ git branch dev
+$ git checkout dev）
+  可以用git branch查看当前分支
+$ git branch命令会列出所有分支，比如对readme.txt做个修改，加上一行：creating a new branch is quick，然后提交
+$ git add readme.txt 
+$ git commit -m "branch test"
+现在，dev分支的工作完成，我们就可以  切换  回master分支：
+$ git checkout master
+Switched to branch 'master'
+切换回master分支后，再查看一个readme.txt文件，刚才添加的内容不见了！因为那个提交是在dev分支上，而master分支此刻的提交点并没有变。因此我们需要把dev分支的工作成果合并到master分支上。
+使用$ git merge dev命令用于合并指定分支到当前分支。合并后，再查看readme.txt的内容，就可以看到，和dev分支的最新提交是完全一样的。
+合并完成后，可以删除dev分支
+$ git branch -d dev*****删除命令
+删除后，只剩下master分支了
+快速合并，在master主支干（无提交）和分支dev（新的提交）结合
+小结
+Git鼓励大量使用分支：
+查看分支：git branch
+创建分支：git branch <name>
+切换分支：git checkout <name>
+创建+切换分支：git checkout -b <name>
+合并某分支到当前分支：git merge <name>
+删除分支：git branch -d <name>
+
+
+解决冲突
+新建立分支feature1，使其拥有提交，这种情况主支干和支干都有提交的情况下，无法实现快速合并。 只能试图把各自的修改合并起来，但这种合并就可能会有冲突
+$ git merge feature1
+Auto-merging readme.txt
+CONFLICT (content): Merge conflict in readme.txt
+Automatic merge failed; fix conflicts and then commit the result.
+git提示我们发生冲突。使用git status可以告诉我们冲突的文件。
+此时需要手动调整文件。修改为主支线master的内容在提交，然后删除feature1支干
+
+
+分支管理策略
+
+
+合并分支时，加上--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并。
+合并dev分支，请注意--no-ff参数，表示禁用Fast forward：
+$ git merge --no-ff -m "merge with no-ff" dev
+附加命令：
+$ git log --graph --pretty=oneline --abbrev-commit
+*   5ccac9a (HEAD -> master) merge with no-ff
+|\
+| * d9acf66 (dev) add merge
+|/
+*   ddd6909 conflict fixed
+|\
+| * 0cbc722 AND simple
+* | 9ca63a1 &simple
+|/
+* fdbaaf3 branch test
+* 70a76a1 (origin/master) add test.txt
+* c8fc7ab wrote a readme file
+
+bug 分支
+
+出现bug后，很自然地，你想创建一个分支issue-101来修复它，但是，等等，当前正在dev上进行的工作还没有提交，这时工作到一半的任务，你还不想提交，于是，Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作：
+$ git stash
+现在，用git status查看工作区，就是干净的（除非有没有被Git管理的文件），因此可以放心地创建分支来修复bug。
+首先确定要在哪个分支上修复bug，假定需要在master分支上修复，就从master创建临时分支：
+$ git checkout master
+$ git checkout -b issue-101
+现在修复bug，需要把“Git is free software ...”改为“Git is a free software ...”，然后提交：
+$ git add readme.txt 
+$ git commit -m "fix bug 101"
+修复完成后，切换到master分支，并完成合并，最后删除issue-101分支：
+$ git checkout master
+$ git merge --no-ff -m "merged bug fix 101" issue-101
+修复bug的工作完成了，现在可以切换回dev分支干活。
+刚才的工作现场存到哪去了？用git stash list命令看看：
+$ git stash list
+工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：
+一是用git stash apply恢复，但是恢复后，stash内容并不删除，你需要用git stash drop来删除；
+另一种方式是用git stash pop，恢复的同时把stash内容也删了：
+
+
+Feature分支
+接到新的开发命令
+$ git checkout -b feature-vulcan
+开发完毕
+$ git add vulcan.py
+
+$ git status
+On branch feature-vulcan
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+    new file:   vulcan.py
+
+$ git commit -m "add feature vulcan"
+[feature-vulcan 287773e] add feature vulcan
+ 1 file changed, 2 insertions(+)
+ create mode 100644 vulcan.py
+切回dev，准备合并
+$ git checkout dev
+可是此时要求将此分支删除，git会提醒你，因为feature-vulcan分支还未被合并，如果删除，将丢掉修改，如果要强行删除，需要使用大写的-D参数
+git branch -D <name>强行删除。
+
+多人合作
+当你从远程仓库克隆时，实际上Git自动把本地的master分支和远程的master分支对应起来了，并且，远程仓库的默认名称是origin。
+看远程库的信息，用git remote：
+$ git remote
+origin
+git remote -v可以显示origin的地址
+
+推送分支
+推送分支，就是把该分支上的所有本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+$ git push origin master
+如果要推送其他分支，比如dev，就改成：
+$ git push origin dev
+那么哪些分支需要我们去进行推送呢？
+master分支是主分支，因此要时刻与远程同步；
+dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
+feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
+
+抓取分支
+多人协作时，大家都会往master和dev分支上推送各自的修改。
+此时有小伙伴可以再另一台电脑录下克隆
+$ git clone git@github.com:michaelliao/learngit.git
+当小伙伴从远程库克隆时，默认情况下，小伙伴只能看到本地的master分支（可用git branch查看）
+小伙伴要咋dev分支上开发，必须创建远程origin的dev分支到本地，于是他用这个命令创建本地dev分支：$ git checkout -b dev origin/dev
+现在，他就可以在dev上继续修改，然后，时不时地把dev分支push到远程：
+你的小伙伴已经向origin/dev分支推送了他的提交，而碰巧你也对同样的文件作了修改，并试图推送：
+$ cat env.txt
+env
+$ git add env.txt
+$ git commit -m "add new env"
+推送失败，因为你的小伙伴的最新提交和你试图推送的提交有冲突，解决办法也很简单，Git已经提示我们，先用git pull把最新的提交从origin/dev抓下来，然后，在本地合并，解决冲突，再推送：如果又失败了，原因是没有指定本地dev分支与远程origin/dev分支的链接，根据提示，设置dev和origin/dev的链接：$ git branch --set-upstream-to=origin/dev dev
+这回git pull成功，但是合并有冲突，需要手动解决，解决的方法和分支管理中的解决冲突完全一样。解决后，提交，再push：
+
+
+Rebase
